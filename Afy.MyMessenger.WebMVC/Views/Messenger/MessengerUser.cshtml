@@ -1,0 +1,22 @@
+﻿
+@{
+    ViewData["Title"] = "MessengerUser";
+}
+
+<h1>Messenger User</h1>
+
+<form method="get" asp-action="Index2" class="row">
+    <div class="col-md-8 offset-2">
+        <div class="mb-3">
+            <label class="form-label">Gönderen Id:</label>
+            <input type="text" class="form-control" placeholder="" name="senderid">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Gönderen Id:</label>
+            <input type="text" class="form-control" placeholder="" name="receiverid">
+        </div>
+        <hr />
+        <button class="btn btn-primary" type="submit">Başla</button>
+    </div>
+</form>
+

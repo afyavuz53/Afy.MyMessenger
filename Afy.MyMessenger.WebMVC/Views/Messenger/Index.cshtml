@@ -1,0 +1,55 @@
+﻿@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Messenger All</h1>
+
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <div id="connectionState">
+        </div>
+        <div class="mb-3">
+            <label for="name" class="form-label">Mesaj :</label>
+            <input type="text" class="form-control" id="txtName" placeholder="">
+        </div>
+        <hr />
+        <button class="btn btn-primary" id="btnSenderName">Gönder</button>
+        <hr />
+        <div class="clearfix"></div>
+        <div class="col-md-8">
+            <ul class="list-group" id="listName">
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var connection = new signalR.HubConnectionBuilder().withUrl("/MessageHub").build();
+            function ShowConnectionState() {
+                $('#connectionState').html(`<div class="alert alert-success">Bağlantı Durumu : ${connection.q} </div>`);
+            }
+            connection.start().then(() => {
+                ShowConnectionState();
+            }).catch((err) => {
+                ShowConnectionState();
+                console.log('Hata : ');
+            });
+            $('#btnSenderName').click(() => {
+                if ($('#txtName').val().length > 0) {
+                    connection.invoke("SendName", $('#txtName').val()).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                    $('#txtName').val('');
+                    $('#txtName').focus();
+                }
+            });
+            connection.on("ReceiveName", (name) => {
+                $('#listName').append($('<li>').addClass('list-group-item').text(name))
+            });
+        });
+    </script>
+}

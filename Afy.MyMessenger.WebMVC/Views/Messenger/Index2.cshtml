@@ -1,0 +1,67 @@
+﻿@model MessengerViewModel
+@{
+    ViewData["Title"] = "Index2";
+}
+@Html.Hidden("senderId", Model.SenderId)
+@Html.Hidden("receiverId", Model.ReceiverId)
+
+<h1>Messanger Group</h1>
+
+<div class="row">
+    <div class="col-md-8 offset-2">
+        <div id="connectionState">
+        </div>
+        <div class="mb-4">
+            <label for="name" class="form-label">Mesaj :</label>
+            <input type="text" class="form-control" id="txtMessage" placeholder="">
+        </div>
+        <hr />
+        <button class="btn btn-primary" id="btnSenderName">Gönder</button>
+        <hr />
+        <div class="clearfix"></div>
+        <div class="col-md-8">
+            <ul class="list-group" id="listName">
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        var senderId = $('#senderId').val();
+        var receiverId = $('#receiverId').val();
+        var groupname = [senderId, receiverId].sort().toString()
+        var myUrl = "https://localhost:7080/"
+        $(document).ready(function () {
+            var connection = new signalR.HubConnectionBuilder().withUrl(myUrl + "MessageHub").build();
+            function ShowConnectionState() {
+                $('#connectionState').html(`<div class="alert alert-success">Bağlantı Durumu : ${connection.q} </div>`);
+            }
+            connection.start().then(() => {
+                ShowConnectionState();
+                connection.invoke("JoinGroupChat", groupname).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            }).catch((err) => {
+                ShowConnectionState();
+                console.log('Hata : ');
+            });
+
+            $('#btnSenderName').click(() => {
+                if ($('#txtMessage').val().length > 0) {
+                    var message = $('#txtMessage').val();
+                    connection.invoke("SendGroupMessage", groupname, message).catch(function (err) {
+                        return console.error(err.toString());
+                    });
+                    $('#txtMessage').val('');
+                    $('#txtMessage').focus();
+                }
+            });
+            connection.on("ReceiveGroupMessage", (name) => {
+                $('#listName').append($('<li>').addClass('list-group-item').text(name))
+            });
+        });
+    </script>
+}
